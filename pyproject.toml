@@ -1,0 +1,36 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ecommerce-datagen"
+version = "0.3.0"
+description = "Robust E-commerce OLTP synthetic data generator for PostgreSQL using Faker"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "faker>=24.0.0,<50",
+  "psycopg2-binary>=2.9.9,<3",
+  "python-dotenv>=1.0.1,<2",
+  "rich>=13.7.1,<16",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0.0,<10",
+]
+
+[project.scripts]
+ecommerce-datagen = "ecommerce_datagen.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ecommerce_datagen"]
+
+[tool.uv]
+default-groups = ["dev"]
+package = true

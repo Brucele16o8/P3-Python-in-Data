@@ -1,0 +1,5 @@
+faker>=24,<50
+psycopg2-binary>=2.9.9,<3
+python-dotenv>=1,<2
+rich>=13.7.1,<16
+pytest>=8,<10

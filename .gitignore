@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+.uv-cache/
+.idea/
+.python-version
+.env
+*.pyc
+.DS_Store
+*.iml
