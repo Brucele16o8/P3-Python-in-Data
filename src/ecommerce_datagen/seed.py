@@ -108,7 +108,7 @@ def _insert_brands(cur, brand_rows: list[dict], batch_size: int) -> dict[str, in
     - Required NOT NULL column `country` is always provided.
     """
 
-    unique_brands: dict[str, tuple[str, str]] = {}
+    unique_brands: dict[str, tuple[str, str, object]] = {}
 
     for row in brand_rows:
         brand_name = _clean_text(
@@ -122,6 +122,7 @@ def _insert_brands(cur, brand_rows: list[dict], batch_size: int) -> dict[str, in
             row.get("country"),
             default="Unknown",
         )
+        created_at = row.get("created_at")
 
         # Dedupe "Samsung", " samsung ", "SAMSUNG" as the same logical brand.
         key = brand_name.casefold()
@@ -129,12 +130,12 @@ def _insert_brands(cur, brand_rows: list[dict], batch_size: int) -> dict[str, in
         # Keep the first brand value.
         # If first country was Unknown and later one has a real country, upgrade it.
         if key not in unique_brands:
-            unique_brands[key] = (brand_name, country)
+            unique_brands[key] = (brand_name, country, created_at)
         else:
-            existing_name, existing_country = unique_brands[key]
+            existing_name, existing_country, existing_created_at = unique_brands[key]
 
             if existing_country == "Unknown" and country != "Unknown":
-                unique_brands[key] = (existing_name, country)
+                unique_brands[key] = (existing_name, country, existing_created_at)
 
     values = list(unique_brands.values())
 
@@ -142,7 +143,7 @@ def _insert_brands(cur, brand_rows: list[dict], batch_size: int) -> dict[str, in
         return {}
 
     sql = """
-        INSERT INTO brand (brand_name, country)
+        INSERT INTO brand (brand_name, country, created_at)
         VALUES %s
         ON CONFLICT (brand_name)
         DO UPDATE SET
@@ -154,7 +155,7 @@ def _insert_brands(cur, brand_rows: list[dict], batch_size: int) -> dict[str, in
         cur,
         sql,
         values,
-        template="(%s, %s)",
+        template="(%s, %s, %s)",
         page_size=batch_size,
         fetch=True,
     )
